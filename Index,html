@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Context</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .particle {
+            position: absolute;
+            background: #00d4ff;
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0px) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00d4ff, #0099cc, #00d4ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 16px;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #b3b3b3;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Main container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Navigation cards */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-card:hover::before {
+            left: 100%;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-card:hover .nav-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .nav-description {
+            color: #b3b3b3;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Roadmap specific styling */
+        .roadmap-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+        }
+
+        .guardian-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+        }
+
+        .injector-card {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(251, 146, 60, 0.1));
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .nav-card {
+                padding: 24px;
+            }
+            
+            .main-container {
+                padding: 20px 16px;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <div class="header">
+        <h1 class="logo">Script Context</h1>
+        <p class="tagline">Advanced script execution and management platform. Execute, protect, and manage your Lua scripts with enterprise-grade security and performance.</p>
+    </div>
+
+    <div class="main-container">
+        <div class="nav-grid">
+            <div class="nav-card roadmap-card fade-in" onclick="navigateTo('roadmap.html')" style="animation-delay: 0.1s">
+                <div class="nav-icon">🗺️</div>
+                <h3 class="nav-title">Roadmap</h3>
+                <p class="nav-description">View our development progress, upcoming features, and completed milestones. Track the evolution of Script Context.</p>
+            </div>
+
+            <div class="nav-card guardian-card fade-in" onclick="navigateTo('guardian.html')" style="animation-delay: 0.2s">
+                <div class="nav-icon">🛡️</div>
+                <h3 class="nav-title">Guardian</h3>
+                <p class="nav-description">Advanced protection system for your scripts. Anti-reverse engineering, code obfuscation, and security monitoring.</p>
+            </div>
+
+            <div class="nav-card injector-card fade-in" onclick="navigateTo('injector.html')" style="animation-delay: 0.3s">
+                <div class="nav-icon">💉</div>
+                <h3 class="nav-title">Injector</h3>
+                <p class="nav-description">High-performance DLL injection system. Fast, reliable, and undetected script execution for all supported games.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p class="footer-text">© 2025 Script Context. Advanced Lua execution platform.</p>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const size = Math.random() * 4 + 1;
+            const startX = Math.random() * window.innerWidth;
+            const duration = Math.random() * 15 + 10;
+            
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = startX + 'px';
+            particle.style.animationDuration = duration + 's';
+            
+            document.getElementById('bgAnimation').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        }
+
+        // Create particles periodically
+        setInterval(createParticle, 3000);
+
+        // Navigation function
+        function navigateTo(page) {
+            // Add click effect
+            const clickedCard = event.currentTarget;
+            clickedCard.style.transform = 'translateY(-4px) scale(0.98)';
+            
+            setTimeout(() => {
+                clickedCard.style.transform = '';
+                // Navigate to page
+                window.location.href = page;
+            }, 150);
+        }
+
+        // Add entrance animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.nav-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.8s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+
+        // Add mouse movement effect
+        document.addEventListener('mousemove', function(e) {
+            const cards = document.querySelectorAll('.nav-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const deltaX = e.clientX - centerX;
+                const deltaY = e.clientY - centerY;
+                
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxDistance = 200;
+                
+                if (distance < maxDistance) {
+                    const strength = (maxDistance - distance) / maxDistance;
+                    const rotateX = (deltaY / rect.height) * strength * 10;
+                    const rotateY = (deltaX / rect.width) * strength * -10;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+                } else {
+                    card.style.transform = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
